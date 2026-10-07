@@ -1,2 +1,1 @@
-# Tamweel-Lite-Advanced-Machine-Learning-Methods-Ghadah
-A practical machine learning project developed as part of the Advanced Machine Learning Methods program at SDAIA.
+Tamweel Lite — an educational machine learning project for credit-risk prioritization, model comparison, threshold-based review decisions, and capacity-constrained simulated screening.
