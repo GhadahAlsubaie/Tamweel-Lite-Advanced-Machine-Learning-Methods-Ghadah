@@ -3,7 +3,7 @@
 An end-to-end machine-learning capstone for cost-sensitive review flagging using synthetic lending data. The project covers temporal validation, out-of-fold probability generation, model comparison, cost-sensitive threshold selection, capacity constraints, calibration diagnostics, interpretability, ensemble evaluation, and final challenge inference.
 
 **Developer:** Ghada
-**Project type:** Individual learner project
+**Project type:** Individual learner project 
 **Training programme:** SDAIA Academy
 **Course:** `SDA-DSC-211 — Advanced Machine Learning Methods | أساليب تعلم الآلة المتقدمة`
 
