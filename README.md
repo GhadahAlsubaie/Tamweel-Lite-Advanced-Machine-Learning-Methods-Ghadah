@@ -1,423 +1,623 @@
-Tamweel Lite — Advanced Machine Learning Methods
+# Tamweel Lite — Advanced Machine Learning Methods
 
-An educational machine learning project developed as part of the SDAIA Academy — Advanced Machine Learning Methods training programme.
+An end-to-end machine-learning capstone for cost-sensitive review flagging using synthetic lending data. The project covers temporal validation, out-of-fold probability generation, model comparison, cost-sensitive threshold selection, capacity constraints, calibration diagnostics, interpretability, ensemble evaluation, and final challenge inference.
 
-Course: SDA-DSC-211 — Advanced Machine Learning Methods | أساليب تعلم الآلة المتقدمة
+**Developer:** Ghada
+**Project type:** Individual learner project
+**Training programme:** SDAIA Academy
+**Course:** `SDA-DSC-211 — Advanced Machine Learning Methods | أساليب تعلم الآلة المتقدمة`
 
-Project Purpose
+> **Important:** This repository is a learner project completed for the training programme. It is **not an official SDAIA Academy repository**.
 
-Tamweel Lite demonstrates an end-to-end machine learning workflow for credit-risk prioritization and simulated review screening using synthetic course data.
+## Project overview
 
-The project focuses on:
+Tamweel Lite addresses a simulated lending-review decision:
 
-classification model comparison
-time-aware validation
-out-of-fold (OOF) probability generation
-cost-sensitive threshold selection
-capacity-constrained decision policies
-calibration diagnostics
-model stability
-interpretability
-ensemble evaluation
-reproducible final inference
+> **Which applications should be flagged for human review when missing a risky application is substantially more costly than reviewing a non-risky application, while review capacity is limited?**
 
-The project is educational and experimental. It does not represent a real lending system or a real credit decision.
+The project uses synthetic course data and applies a cost-sensitive decision policy with:
 
-Problem
+* **False Negative cost = 10**
+* **False Positive cost = 1**
+* **Maximum review capacity = 12% per validation period**
 
-The project addresses a binary classification problem in which applications are assigned estimated risk probabilities and then prioritized for a simulated review process.
+The system produces a **review flag**, not a loan approval or rejection decision.
 
-The workflow evaluates models beyond ROC-AUC by considering:
+The complete workflow covers:
 
-Average Precision
-time-aware validation
-out-of-fold probabilities
-threshold selection
-simulated decision loss
-review-capacity constraints
-calibration diagnostics
-model stability
-interpretability
-operational complexity
+1. Data-role validation and provenance
+2. Temporal/customer-aware dataset separation
+3. Baseline and candidate model development
+4. Forward out-of-fold probability generation
+5. Logistic Regression, XGBoost, and LightGBM comparison
+6. Ensemble evaluation through a documented Worth-It Gate
+7. Cost-sensitive threshold selection
+8. Capacity-constrained review policy
+9. Calibration diagnostics
+10. Interpretability and stability analysis
+11. Final model refit
+12. Challenge-set inference without challenge labels
+13. Reproducibility and provenance artifacts
 
-The educational decision policy uses:
+---
 
-10 × FN + 1 × FP
+## Key decision and value
 
-with a simulated review-capacity ceiling of 12%.
+The project is designed to improve one specific operational decision:
 
-The cost values are educational units only. They do not represent Saudi Riyal losses, expected credit loss, or real financial costs.
+**Select a limited set of applications for review while balancing the cost of missed risk against unnecessary review.**
 
-Project Workflow
+The decision policy uses the course-defined loss:
 
-The course work is maintained in a consolidated learner notebook covering Day 1 through Day 5, following the instructor's delivery instruction to place the course work in one notebook with clear day headings.
+`10 × FN + 1 × FP`
 
-Day 1 — Baseline Boosting
-Data preparation
-Baseline classification modelling
-Initial model comparison
-Day 2 — Validation & Tuning
-Time-aware validation
-Out-of-fold predictions
-Model validation and tuning
-Day 3 — Imbalance, OOF Probabilities, Cost-Sensitive Decisions
-Class imbalance
-OOF probability analysis
-Cost-sensitive threshold selection
-Capacity-aware decision rules
-Day 4 — Explainability, Calibration, and Stability
-Model explainability
-SHAP analysis
-Calibration diagnostics
-Stability and diagnostic analysis
-Day 5 — Ensemble, Final Model, and Challenge Inference
-Ensemble comparison
-Worth-It Gate
-Final model selection
-Frozen threshold application
-Capacity-constrained simulated review screening
-Challenge inference
-Data
+subject to a maximum review capacity of **12% per validation period**.
 
-The project uses synthetic course data only.
+This makes the final output a **review-prioritisation signal**, rather than a prediction of approval, rejection, or legal creditworthiness.
 
-No confidential employer data, third-party personal data, credentials, or real customer lending records are used.
+---
 
-The challenge dataset is intentionally unlabeled. Challenge labels are not used or inferred.
+# Key results
 
-The workflow maintains separate roles for model development, calibration, policy selection, and challenge inference to reduce leakage and preserve the intended evaluation design.
+## Model comparison
 
-Models
+Model comparison was performed using **2,155 nested out-of-fold predictions across three forward validation periods**.
 
-The project evaluates:
+The primary comparison metric was Average Precision (AP), with fold stability, Brier score, ECE, and the documented ensemble Worth-It Gate also considered.
 
-Logistic Regression
-XGBoost
-LightGBM
+| Model                   |     Mean AP | Fold SD | Mean Brier | Mean ECE | Lift vs single |
+| ----------------------- | ----------: | ------: | ---------: | -------: | -------------: |
+| **Logistic Regression** | **0.39166** | 0.02981 |    0.06327 |  0.01882 |    **0.00000** |
+| Weighted Ensemble       |     0.38942 | 0.02906 |    0.06332 |  0.01772 |       -0.00224 |
+| Stacking                |     0.38314 | 0.02949 |    0.06603 |  0.03106 |       -0.00852 |
+| Equal Ensemble          |     0.37170 | 0.03258 |    0.06435 |  0.02038 |       -0.01996 |
+| XGBoost                 |     0.35263 | 0.02904 |    0.06566 |  0.02276 |       -0.03903 |
+| LightGBM                |     0.34549 | 0.04348 |    0.06608 |  0.02311 |       -0.04617 |
 
-Ensemble alternatives were also evaluated using:
+### Final model decision
 
-Equal-weight ensemble
-Weighted ensemble
-Stacking
-Final Model Decision
+**KEEP SINGLE → Logistic Regression**
 
-The final decision was:
+None of the evaluated ensembles passed the documented Worth-It Gate. Logistic Regression therefore remained the selected single model.
 
-KEEP SINGLE → Logistic Regression
+See:
 
-Logistic Regression achieved the highest mean Average Precision among the single-model candidates:
+* [Ensemble Decision](reports/ENSEMBLE_DECISION.md)
+* [Ensemble gate evidence](artifacts/day5_ensemble_gate.json)
+* [Fold scores](artifacts/day5_fold_scores.csv)
+* [OOF predictions](artifacts/day5_oof_predictions.csv)
 
-Candidate	Mean Average Precision
-Logistic Regression	0.39166
-Weighted Ensemble	0.38942
-Stacking	0.38314
-Equal-weight Ensemble	0.37170
-XGBoost	0.35263
-LightGBM	0.34549
+---
 
-None of the ensemble alternatives passed the project's Worth-It Gate. Therefore, the additional complexity of an ensemble was not justified by the observed validation evidence.
+## Validation strategy
 
-Choosing a single model was an evidence-based decision rather than an assumption that ensembles are always better.
+The project uses temporal and customer-aware role separation to reduce leakage risk.
 
-Validation
+The Day 5 development workflow contained:
 
-Model comparison used 2,155 OOF rows across three forward validation periods.
+| Role             |  Rows | Customers | Positives | Period                  |
+| ---------------- | ----: | --------: | --------: | ----------------------- |
+| Fit + selection  | 6,576 |     3,931 |       537 | 2022-01-01 → 2024-04-01 |
+| Calibration only |   836 |       788 |        78 | 2024-07-01 → 2024-09-30 |
+| Excluded         | 2,588 |         — |         — | —                       |
 
-The OOF predictions were used for model comparison and decision-policy development.
+The nested OOF process produced:
 
-OOF results are not treated as an untouched final test set. The observed fold variation does not represent a confidence interval, and validation performance cannot guarantee future production performance.
+* **2,155 OOF rows**
+* **3 forward validation periods**
+* Warm-up rows without an outer OOF prediction were excluded from the OOF comparison.
 
-The validation design uses forward temporal separation to reduce look-ahead leakage.
+OOF development/selection is not treated as an untouched final test set.
 
-Decision Policy
+See:
 
-The educational decision policy uses:
+* [Day 5 roles](artifacts/day5_roles.csv)
+* [OOF provenance](artifacts/day5_oof_provenance.json)
+* [OOF predictions](artifacts/day5_oof_predictions.csv)
+* [Final provenance](artifacts/day5_final_provenance.json)
 
-10 × FN + 1 × FP
+---
 
-with a maximum review-capacity ceiling of 12%.
+# Cost-sensitive review policy
 
-The selected raw threshold was:
+The selected threshold was:
 
-0.168922
+`0.168922`
 
-The threshold was selected using OOF development evidence rather than the unlabeled challenge batch.
+Using the course policy of **10×FN + 1×FP**, the OOF decision produced:
 
-Challenge Screening
+| Metric                       |   Result |
+| ---------------------------- | -------: |
+| Threshold                    | 0.168922 |
+| TP                           |       84 |
+| FP                           |      161 |
+| FN                           |       95 |
+| TN                           |    1,815 |
+| Review flags                 |      245 |
+| Flag fraction                |   11.37% |
+| Maximum period flag fraction |   11.75% |
+| Recall                       |   46.93% |
+| Precision                    |    8.15% |
+| Loss units                   |    1,111 |
+| Capacity feasible            |      Yes |
 
-The final model was applied to 2,500 challenge applications.
+The maximum observed period flag fraction was **11.75%**, remaining below the **12% capacity constraint**.
 
-Measure	Result
-Challenge rows	2,500
-Initially eligible by threshold	330
-Final review flags after capacity policy	300
-Final flagged rate	12%
-Removed by capacity policy	30
+See:
 
-The batch policy applies the probability threshold first and then applies the capacity constraint once.
+* [Decision Card](reports/DECISION_CARD.md)
+* [Final policy](artifacts/final_policy.json)
+* [Threshold sweep](artifacts/day5_threshold_sweep.csv)
+* [Period capacity audit](artifacts/day5_period_capacity.csv)
+* [Regional audit](artifacts/day5_region_audit.csv)
 
-A final decision = 1 means that an application was included in the simulated review list. It does not mean loan approval, loan rejection, or a real-world credit decision.
+### Cost sensitivity
 
-Because challenge labels are unavailable, the challenge set cannot be used to calculate:
+With the threshold fixed, the observed loss changed as the FN cost changed:
 
-Average Precision
-decision loss
-false-positive rate
-recall
-other label-dependent performance metrics
+| FN cost | FP cost |  Loss |
+| ------: | ------: | ----: |
+|       8 |       1 |   921 |
+|      10 |       1 | 1,111 |
+|      12 |       1 | 1,301 |
 
-No challenge performance metrics have been fabricated.
+This sensitivity analysis is descriptive and does not replace the course-defined `10 × FN + 1 × FP` policy.
 
-Calibration Fit Diagnostics
+---
 
-Calibration was fitted using a dedicated calibration sample of 836 rows from July–September 2024.
+# Challenge inference
 
-The following are calibration-fit diagnostics, not independent final evaluation results:
+The challenge labels were unavailable and were **not used**.
 
-Metric	Before	After
-ROC-AUC	0.789037	0.789037
-Average Precision	0.789037	0.789037
-ECE	0.266489	0.277296
-Log Loss	0.076473	0.078058
-Brier Score	0.287803	0.287803
+Final inference was run on:
 
-In this calibration sample:
+* **2,500 challenge rows**
+* Capacity: **300 applications**
+* Initially threshold-eligible: **330**
+* Final flags after capacity rule: **300**
+* Removed by capacity: **30**
+* Capacity utilisation: **12%**
 
-ROC-AUC remained unchanged.
-Average Precision remained unchanged.
-Brier Score remained unchanged.
-ECE increased from 0.266489 to 0.277296.
-Log Loss increased from 0.076473 to 0.078058.
+The final batch policy was:
 
-Therefore, the project does not claim that calibration improved model performance.
+1. Generate probabilities using the frozen final model.
+2. Apply the frozen threshold.
+3. Rank threshold-eligible applications by probability.
+4. Enforce the final capacity limit.
+5. Retain complete equal-score blocks according to the documented tie policy.
 
-Calibration is treated as a limited diagnostic, and these fit diagnostics should not be interpreted as independent evidence of future calibration quality.
+`decision = 1` represents a **simulated review flag only**.
 
-Interpretability Scope
+Because challenge labels were unavailable, **no challenge-set accuracy, AP, ROC-AUC, recall, precision, or loss is reported**.
 
-Model interpretation is intended to explain model behaviour, not establish causal relationships.
+See:
 
-SHAP values describe contributions to the model output in the units produced by the interpretation method. They should not be interpreted directly as percentage-point changes in probability.
+* [Submission](submission/submission.csv)
+* [Submission manifest](submission/submission_manifest.json)
+* [Challenge capacity evidence](artifacts/day5_challenge_capacity.png)
+* [Final provenance](artifacts/day5_final_provenance.json)
 
-The interpretation workflow does not establish:
+---
 
-causality
-fairness
-legality or regulatory compliance
-the effect of protected characteristics
-why a real customer would default
-Final-model interpretation limitation
+# Calibration
 
-The SHAP analysis generated during the earlier project stage belongs to an earlier model stage and should not be treated as evidence explaining the final Day 5 Logistic Regression model unless SHAP is regenerated specifically for that final model.
+Calibration was evaluated separately from model selection.
 
-This distinction is intentionally documented to avoid transferring explanation evidence between different model versions.
+The Day 5 calibration fit used **836 calibration rows**.
 
-Intended Use
+The fit diagnostics showed:
 
-Tamweel Lite is an educational and experimental machine learning project.
+| Metric            |   Before |    After |
+| ----------------- | -------: | -------: |
+| ROC-AUC           | 0.789037 | 0.789037 |
+| Average Precision | 0.789037 | 0.789037 |
+| ECE               | 0.266489 | 0.277296 |
+| Log Loss          | 0.076473 | 0.078058 |
+| Brier             | 0.287803 | 0.287803 |
 
-Its purpose is to demonstrate:
+Calibration therefore **did not demonstrate improvement in these fit diagnostics**:
 
-model comparison
-honest validation
-OOF probability generation
-cost-sensitive decision making
-capacity-aware policies
-calibration diagnostics
-ensemble evaluation
-reproducible inference
+* ECE increased slightly.
+* Log Loss increased slightly.
+* Brier score remained unchanged.
+* ROC-AUC and AP remained unchanged.
 
-The final decision flag represents inclusion in a simulated review list only.
+These diagnostics are not treated as an independent final evaluation because the calibration rows were used to fit the calibration mapping.
 
-It does not represent:
+See:
 
-loan approval
-loan rejection
-a real credit decision
-a guarantee of customer default
-a guarantee of model safety
-a fairness certification
-a regulatory or legal assessment
+* [Calibration fit predictions](artifacts/day5_calibration_predictions.csv)
+* [Calibration fit bins](artifacts/day5_calibration_fit_bins.csv)
+* [Calibration fit evidence](artifacts/day5_calibration_fit.png)
+* [Calibration metrics](artifacts/calibration_metrics.json)
 
-The project uses synthetic data and does not support conclusions about real customers or real lending performance.
+---
 
-Environment
+# Interpretability
 
-The assessed learning path is designed to run on a free Google Colab CPU environment.
+The repository contains a Day 4 interpretability analysis based on an **earlier model**, not the final Day 5 Logistic Regression model.
 
-Runtime
-Google Colab
-Free CPU runtime
-Python 3.13.16
-FAST_MODE=True
-seed: 211
-n_jobs=2
+This distinction is intentional and documented.
 
-GPU, TPU, paid services, API keys, and external paid inference services are not required.
+The Day 4 analysis included:
 
-Key package versions
+* permutation importance
+* global SHAP
+* local SHAP
+* stability analysis
+* calibration analysis
 
-The executed environment recorded the following versions:
+Example local explanation:
 
-Package	Version
-NumPy	2.1.3
-pandas	2.2.3
-SciPy	1.16.3
-scikit-learn	1.6.1
-matplotlib	3.10.0
-XGBoost	3.4.1
-LightGBM	4.6.0
-SHAP	0.52.0
-numba	0.61.2
-Optuna	4.5.0
+**TR-009585**
 
-The final repository should preserve the recorded environment and provenance artifacts generated by the project.
+* Raw score: `0.9031`
+* Calibrated probability: `0.4795`
+* `bureau_score` contribution: `+2.269325` log-odds
+* `dti` contribution: `+1.198145` log-odds
+* `loan_amount_sar` contribution: `+0.200725` log-odds
 
-Reproducibility
+The SHAP analysis is **descriptive, not causal**. It is not presented as a fairness certificate, legal-compliance assessment, or causal explanation.
 
-The project uses fixed seeds and records environment and execution information required to reproduce the assessed workflow.
+See:
 
-The final repository should preserve:
+* [Interpretability Report](reports/INTERPRETABILITY_REPORT.md)
+* [Global SHAP](artifacts/day4_shap_global.csv)
+* [SHAP metadata](artifacts/day4_shap_metadata.json)
+* [SHAP example](day4_shap_example.json)
+* [Permutation importance](artifacts/permutation_importance.csv)
 
-executed learner notebook
-environment information
-package versions
-random seed
-model and policy parameters
-data-role information
-validation evidence
-generated metrics
-provenance information
-manifest
-final bundle
-final Git commit SHA
-final Git tag
+---
 
-The assessed version must be identifiable by its exact repository commit.
+# Stability and monitoring
 
-The final repository should be rerunnable from a clean free-CPU environment without relying on hidden local files, paid services, private credentials, or challenge labels.
+The project includes period-level stability analysis and customer-cluster bootstrap analysis.
 
-How to Run
-Google Colab
-Open the consolidated learner notebook in Google Colab.
-Confirm the free CPU runtime and course-approved configuration.
-Run the notebook sequentially from Day 1 through Day 5.
-Preserve the executed outputs and learner reasoning.
-Review the generated validation, decision, calibration, ensemble, and challenge-inference outputs.
-Run the final validation and submission checks.
-Preserve the final generated artifacts and provenance files.
-Use the exact final repository version for the presentation and submission.
+Monitoring considerations for future development data include:
 
-The consolidated notebook uses explicit Day 1–Day 5 headings so that the complete learning path and evidence can be followed within one executable notebook.
+* Average Precision
+* Brier score
+* Expected Calibration Error
+* calibration stability
+* score and probability drift
+* prevalence changes
+* false-positive / false-negative trade-offs
+* review capacity
+* threshold stability
 
-Outputs
+A future threshold or model change should be evaluated on new development evidence rather than tuned on the unlabeled challenge set.
 
-The final repository is intended to provide clear access to the project evidence and required deliverables, including:
+See:
 
-consolidated executed learner notebook
-technical documentation
-Decision Card
-Interpretability Report
-Ensemble Decision
-Model Card
-evaluation metrics
-model artifacts
-provenance and manifest files
-submission.csv
-metrics.json
-final presentation PDF
-final repository bundle
+* [Stability summary](artifacts/day4_stability_summary.json)
+* [Bootstrap results](artifacts/day4_bootstrap.csv)
+* [Period metrics](artifacts/day4_period_metrics.csv)
 
-The repository structure and links should be kept consistent with the official learner template and the final assessed version.
+---
 
-Technical Decision Summary
-Decision	Final result
-Validation design	Time-aware forward validation
-OOF rows	2,155
-Final model	Logistic Regression
-Ensemble decision	KEEP SINGLE
-Worth-It Gate	No ensemble passed
-Raw threshold	0.168922
-Capacity ceiling	12%
-Challenge rows	2,500
-Final challenge review flags	300
-Challenge labels	Unavailable
-Challenge performance metrics	Not computed
-Calibration conclusion	No improvement demonstrated in calibration-fit diagnostics
-Limitations
+# Technical pipeline
 
-Key limitations include:
+1. Verify the synthetic course data and data roles.
+2. Separate fit, selection, calibration, policy, and evaluation roles according to the documented temporal workflow.
+3. Build candidate models using training/development data only.
+4. Generate nested forward OOF probabilities.
+5. Compare Logistic Regression, XGBoost, and LightGBM.
+6. Evaluate equal-weighted, weighted, and stacked ensembles.
+7. Apply the documented Worth-It Gate.
+8. Select Logistic Regression as the final single model.
+9. Evaluate the cost-sensitive threshold under the 12% capacity constraint.
+10. Perform calibration diagnostics on the designated calibration rows.
+11. Refit the selected final model according to the documented final workflow.
+12. Generate challenge probabilities without using challenge labels.
+13. Apply the frozen threshold and capacity policy.
+14. Produce `submission.csv` and provenance artifacts.
+15. Preserve the final repository state for reproducibility and assessment.
 
-Validation evidence is based on three forward periods.
-OOF results are used for development and model selection rather than as an untouched final test.
-Fold-level variation does not constitute a confidence interval.
-The challenge dataset is unlabeled.
-Calibration diagnostics are based on a limited calibration sample.
-Calibration-fit diagnostics did not demonstrate improvement in ECE or Log Loss.
-The simulated cost policy is educational and does not represent Saudi Riyal losses or expected credit loss.
-The capacity policy is a simulated operational constraint.
-Regional analysis is descriptive and does not constitute a fairness certification.
-Model explanations describe model behaviour rather than causal relationships.
-Earlier-stage SHAP evidence should not be transferred to the final model without regeneration.
-Future production performance cannot be guaranteed from the current validation evidence.
-The synthetic dataset does not support conclusions about real borrowers, customers, or lending outcomes.
-Assessment Integrity
+---
 
-This repository is intended to preserve an auditable record of the learner's executed project.
+# Repository structure
 
-No challenge labels, private credentials, confidential employer information, or unnecessary personal data are included.
+```text
+Tamweel-Lite-Advanced-Machine-Learning-Methods-Ghadah/
+├── artifacts/
+│   ├── final_model/
+│   │   ├── model.json
+│   │   └── model_manifest.json
+│   ├── day5_ensemble_gate.json
+│   ├── day5_oof_predictions.csv
+│   ├── day5_oof_provenance.json
+│   ├── day5_final_provenance.json
+│   ├── final_metrics.json
+│   ├── final_policy.json
+│   ├── environment.json
+│   └── ...
+├── data/
+├── presentation/
+│   └── final_presentation.pdf
+├── reports/
+│   ├── DECISION_CARD.md
+│   ├── ENSEMBLE_DECISION.md
+│   ├── INTERPRETABILITY_REPORT.md
+│   └── MODEL_CARD.md
+├── submission/
+│   ├── submission.csv
+│   └── submission_manifest.json
+├── Tamweel_Lite v2.ipynb
+├── data_contract.json
+├── data_manifest.json
+├── feature_dictionary.csv
+├── tamweel_challenge.csv
+├── tamweel_dirty.csv
+├── tamweel_oof_matrix.csv
+├── tamweel_train.csv
+├── day4_shap_example.json
+├── day4_shap_example.npz
+├── day5_oof_example.json
+├── LICENSE
+└── README.md
+```
 
-Educational/example outputs, if referenced, are treated as learning aids and are not presented as personal execution evidence.
+---
 
-Metrics and decisions reported in this README are based on the executed project outputs and are not intended to be fabricated, backfilled, or replaced with peer evidence.
+# Quick start
 
-References and Disclosure
-Course and technical references
+## 1. Environment
 
-The project was developed using the course materials and the standard open-source Python ecosystem used by the training environment.
+The project was developed and executed using:
 
-The primary programme reference is:
+* Google Colab Free CPU
+* Python `3.13.16`
+* `seed = 211`
+* `n_jobs = 2`
+* `FAST_MODE = True`
 
-SDAIA Academy — Advanced Machine Learning Methods
-Course Code: SDA-DSC-211
+No paid compute, external API, GPU, or Google Drive dependency is required for the documented learner workflow.
 
-SDAIA Academy
+The exact environment and package information are recorded in:
 
-This repository is a learner repository and is not an official SDAIA repository.
+* [Environment manifest](artifacts/environment.json)
 
-SDAIA Academy GitHub:
+## 2. Run the learner notebook
 
-https://github.com/SDAIAAcademy
+Open:
 
-Assistance and reused material
+[Tamweel_Lite v2.ipynb](Tamweel_Lite%20v2.ipynb)
 
-The learner's project work was developed and executed within the course environment.
+The notebook consolidates the five course days into one learner notebook:
 
-External libraries are used according to their respective licenses and documentation.
+```text
+# Day 1 — Baseline Boosting
+# Day 2 — Validation & Tuning
+# Day 3 — Imbalance, OOF Probabilities, Cost-Sensitive Decisions
+# Day 4 — Explainability, Calibration, and Stability
+# Day 5 — Ensemble, Final Model, and Challenge Inference
+```
 
-AI-assisted support was used during the learning and documentation process for explanation, interpretation, troubleshooting, and drafting of documentation. Final project decisions, execution evidence, metrics, and repository contents are based on the learner's executed project.
+The notebook contains executed outputs from the learner's project run.
 
-No peer execution evidence, fabricated metrics, fabricated screenshots, fabricated commits, or challenge labels are used as personal project evidence.
+For assessment, the repository should be treated as the reproducible final project version identified by the final Git commit and tag.
 
-Course Information
+---
 
-Training Programme: SDAIA Academy — Advanced Machine Learning Methods
-Course Code: SDA-DSC-211
-Project: Tamweel Lite
+# Data and provenance
 
-SDAIA Academy GitHub:
-https://github.com/SDAIAAcademy
+The project uses **synthetic course data**.
 
-Repository Status
+Challenge labels were unavailable and were not used for:
 
-The final assessed version should be identified by:
+* training
+* model selection
+* threshold selection
+* calibration
+* evaluation
+* performance reporting
 
-final repository URL
-final commit
-final Git tag
-full commit SHA
-generated manifest
-final project bundle
+The repository documents data roles, provenance, and reproducibility information.
 
-The repository should remain available for review after submission and the assessed tag/commit should not be rewritten or force-pushed.
+See:
+
+* [Data contract](data_contract.json)
+* [Data manifest](data_manifest.json)
+* [Feature dictionary](feature_dictionary.csv)
+* [Final provenance](artifacts/day5_final_provenance.json)
+* [OOF provenance](artifacts/day5_oof_provenance.json)
+
+---
+
+# Reports and assessment evidence
+
+The project includes the four required technical reports:
+
+### Decision Card
+
+[Open Decision Card](reports/DECISION_CARD.md)
+
+Summarises the final decision, threshold, capacity, loss policy, and intended use.
+
+### Interpretability Report
+
+[Open Interpretability Report](reports/INTERPRETABILITY_REPORT.md)
+
+Documents the Day 4 explanation scope, SHAP analysis, limitations, and stability evidence.
+
+### Ensemble Decision
+
+[Open Ensemble Decision](reports/ENSEMBLE_DECISION.md)
+
+Documents the Worth-It Gate and the decision to keep a single Logistic Regression model.
+
+### Model Card
+
+[Open Model Card](reports/MODEL_CARD.md)
+
+Documents intended use, limitations, validation, data scope, and model risks.
+
+### Final presentation
+
+[Open final presentation PDF](presentation/final_presentation.pdf)
+
+The presentation contains five slides covering:
+
+1. Problem and value
+2. Trusted method
+3. Evidence and model decision
+4. Interpretation, calibration, and limitations
+5. Final decision and follow-up
+
+---
+
+# Reproducibility
+
+Reproducibility is treated as a first-class project requirement.
+
+The repository records:
+
+* random seed
+* package/environment information
+* data roles
+* model parameters
+* validation structure
+* provenance
+* output artifacts
+* model files
+* submission manifest
+* final repository version
+
+The assessed version should be identified using:
+
+* final Git commit
+* full commit SHA
+* final Git tag
+* preserved manifest/bundle
+
+No assessed history should be rewritten after finalisation.
+
+---
+
+# Intended use
+
+This project is an **educational and experimental Tamweel Lite modelling exercise** using synthetic data.
+
+The final output is intended to:
+
+* prioritise applications for simulated human review
+* demonstrate cost-sensitive classification
+* demonstrate capacity-constrained decision policies
+* demonstrate reproducible machine-learning workflow
+
+The output is **not intended to**:
+
+* approve or reject loans
+* make legally binding credit decisions
+* establish real-world creditworthiness
+* replace human review
+* provide a fairness or legal-compliance certification
+* make causal claims from model explanations
+
+---
+
+# Limitations
+
+Important limitations include:
+
+* The project uses synthetic course data.
+* The challenge labels are unavailable.
+* Therefore, challenge-set performance cannot be measured honestly.
+* OOF development/selection is not an untouched final test set.
+* Calibration fit diagnostics are not an independent evaluation of calibration performance.
+* Day 4 SHAP explanations correspond to an earlier model and should not automatically be interpreted as explanations of the final Day 5 Logistic Regression model.
+* Regional audits are descriptive and are not presented as fairness certificates.
+* The capacity policy is demonstrated on the available validation evidence and should be re-evaluated with new development data.
+* Real-world deployment would require independent data, governance, monitoring, and domain validation.
+
+---
+
+# Assessment integrity
+
+This repository follows the project integrity requirements:
+
+* No challenge labels are used.
+* No fabricated metrics, screenshots, timestamps, commits, or execution evidence are presented.
+* No personal or confidential employer data is included.
+* Recovery/example outputs are treated as learning aids and are not presented as personal execution evidence.
+* Model explanations are appropriately scoped.
+* Challenge predictions are not presented as challenge performance.
+* The final repository version must be identified by its final commit and Git tag.
+
+---
+
+# Training-program attribution
+
+This project was completed for:
+
+**SDAIA Academy — Advanced Machine Learning Methods**
+
+**Course:** `SDA-DSC-211 — Advanced Machine Learning Methods | أساليب تعلم الآلة المتقدمة`
+
+Training-program reference:
+
+[SDAIA Academy GitHub](https://github.com/SDAIAAcademy)
+
+This is an independent learner repository and is **not an official SDAIA Academy repository**.
+
+---
+
+# AI assistance disclosure
+
+AI tools were used as learning and development assistance where appropriate, including support with:
+
+* code explanation and debugging
+* documentation drafting
+* repository organisation
+* interpretation of technical outputs
+* wording and presentation preparation
+
+The project evidence, executed outputs, modelling decisions, validation results, and final submission artifacts are based on the learner's own project execution.
+
+---
+
+# Final repository status
+
+The final assessed version should record:
+
+| Item                | Final value                                                            |
+| ------------------- | ---------------------------------------------------------------------- |
+| Repository          | `GhadahAlsubaie/Tamweel-Lite-Advanced-Machine-Learning-Methods-Ghadah` |
+| Final commit        | To be recorded after final review                                      |
+| Full commit SHA     | To be recorded after final review                                      |
+| Final Git tag       | To be recorded after final review                                      |
+| Submission manifest | `submission/submission_manifest.json`                                  |
+| Submission file     | `submission/submission.csv`                                            |
+| Final presentation  | `presentation/final_presentation.pdf`                                  |
+
+**Do not create the final tag until all required files, README content, reports, presentation, submission artifacts, and repository checks have been completed.**
+
+---
+
+## Final technical decision
+
+**KEEP SINGLE → Logistic Regression**
+
+The selected model achieved the strongest mean OOF Average Precision among the evaluated candidates:
+
+`Mean AP = 0.39166`
+
+All evaluated ensemble candidates failed the documented Worth-It Gate.
+
+The final review policy uses:
+
+`Threshold = 0.168922`
+
+under:
+
+`10 × FN + 1 × FP`
+
+with a maximum review capacity of:
+
+`12%`
+
+The final challenge inference produced:
+
+`300 review flags / 2,500 challenge rows`
+
+with no challenge performance claims because challenge labels were unavailable.
